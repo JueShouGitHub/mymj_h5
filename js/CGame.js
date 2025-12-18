@@ -83,7 +83,6 @@ function CGame(iLayout,szName){
     
     this.createLayout = function(){
         _oLevelInfo = s_oLevelSettings.getLayoutInfos(_iLayout);
-        _pStartPosLayout = _oLevelInfo.layout_pos;
         var aTilePos = _oLevelInfo.pos;
         var aBlocks = _oLevelInfo.blocks;
         var aBlockingList = _oLevelInfo.block_list;
@@ -91,16 +90,29 @@ function CGame(iLayout,szName){
         _iScoreMultByDifficulty = SCORE_BONUS_LAYOUT[_oLevelInfo.difficulty];
         
         _oContainerLayout = new createjs.Container();
-        _oContainerLayout.x = _pStartPosLayout.x;
-        _oContainerLayout.y = _pStartPosLayout.y;
         _oContainerLayout.scaleX = _oContainerLayout.scaleY = _iCurLayoutScale = _oLevelInfo.layout_scale;
-        s_oStage.addChild(_oContainerLayout);
         
         for(var i=0;i<aTilePos.length;i++){
             var oTile = new CTile(i,aTilePos[i].x,aTilePos[i].y,aBlocks[i].left_block,aBlocks[i].right_block,aBlocks[i].up_block,
                                                                                                 aBlockingList[i],aHeights[i],_oContainerLayout);
             _aTiles[i] = oTile;
         }
+        
+        s_oStage.addChild(_oContainerLayout);
+        
+        // 计算布局居中位置
+        var bounds = _oContainerLayout.getBounds();
+        if(bounds){
+            _pStartPosLayout = {
+                x: (CANVAS_WIDTH - bounds.width * _iCurLayoutScale) / 2 - bounds.x * _iCurLayoutScale,
+                y: (CANVAS_HEIGHT - bounds.height * _iCurLayoutScale) / 2 - bounds.y * _iCurLayoutScale
+            };
+        }else{
+            _pStartPosLayout = _oLevelInfo.layout_pos;
+        }
+        
+        _oContainerLayout.x = _pStartPosLayout.x;
+        _oContainerLayout.y = _pStartPosLayout.y;
     };
     
     this._setTiles = function(){
